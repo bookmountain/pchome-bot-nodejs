@@ -1,0 +1,56 @@
+const API = require('./api')
+const config = require('./config')
+const productId = process.env.PROD_ID || config.prodId
+
+async function main() {
+  // 設定 cookie
+  const cookies = config.cookie
+  if (process.env.COOKIE_ECC) cookies.ECC = process.env.COOKIE_ECC
+  if (process.env.COOKIE_ECWEBSESS)
+    cookies.COOKIE_ECWEBSESS = process.env.COOKIE_ECWEBSESS
+  const api = new API(cookies)
+
+  // 在加入購物車前，必須先呼叫這支 API，來取得產品狀況
+  const snapupResult = await api.snapup(productId)
+
+  // 加入購物車
+  await api.add2Cart(productId, snapupResult, 1)
+
+  // 非必要流程，可以用來確認目前購物車的狀況、運費、支援的配送方式等...
+  const primePriceInfo = (await api.prodCouponInfo()).ProdIDs.map((id) => ({
+    ProdId: id,
+    PrimeInfo: {},
+  }))
+  const res = await api.getCartInfo({
+    CouponInfo: JSON.stringify({ prodCouponData: [] }),
+    PrimePriceInfo: JSON.stringify(primePriceInfo),
+  })
+  console.log(res.shoppingFee ? '要運費' : '免運費')
+  console.log(res.payment.COD.status === 'Y' ? '可貨到付款' : '不可貨到付款')
+  if (
+    res.shoppingFee /* 需要運費 */ ||
+    res.payment.COD.status === 'N' /* 無法貨到付款 */
+  ) {
+    return console.log('取消流程')
+  }
+
+  // 送出訂單
+  const result = await api.order({
+    payWay: 'COD' || 'ATM' || 'IBO', // COD 為貨到付款、ATM 為 ATM 付款、IBO 為 ibon 付款
+    cusName: 'Sam',
+    cusMobile: '0987654321',
+    cusZip: '110',
+    cusAddress: '台北市信義區101',
+    recName: 'Sam',
+    recMobile: '0987654321',
+    recZip: '110',
+    recAddress: '台北市信義區101',
+  })
+
+  if (result.status === 'ERR') {
+    throw new Error(result.msg)
+  }
+  console.log(result)
+}
+
+main().catch(console.error)

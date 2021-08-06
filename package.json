@@ -1,0 +1,28 @@
+{
+  "name": "pchome-api",
+  "description": "PCHOME 的非官方 API 專案。",
+  "version": "0.2.0",
+  "author": "ALiangLiang",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ALiangLiang/pchome-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ALiangLiang/pchome-api/issues"
+  },
+  "homepage": "https://github.com/ALiangLiang/pchome-api",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "crypto-js": "^3.3.0",
+    "dotenv": "^10.0.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.2"
+  }
+}
