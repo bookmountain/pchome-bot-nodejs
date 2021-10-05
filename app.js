@@ -14,7 +14,14 @@ async function main() {
   const snapupResult = await api.snapup(productId)
 
   // 加入購物車
-  await api.add2Cart(productId, snapupResult, 1)
+  try {
+    await api.add2Cart(productId, snapupResult, 1)
+    console.log(productId, snapupResult)
+  } catch (err) {
+    console.log(productId, snapupResult)
+    main()
+    return
+  }
 
   // 非必要流程，可以用來確認目前購物車的狀況、運費、支援的配送方式等...
   const primePriceInfo = (await api.prodCouponInfo()).ProdIDs.map((id) => ({
@@ -26,25 +33,25 @@ async function main() {
     PrimePriceInfo: JSON.stringify(primePriceInfo),
   })
   console.log(res.shoppingFee ? '要運費' : '免運費')
-  console.log(res.payment.COD.status === 'Y' ? '可貨到付款' : '不可貨到付款')
+  console.log(res.payment.LIP.status === 'Y' ? '可LinePay' : '不可LinePay')
   if (
     res.shoppingFee /* 需要運費 */ ||
-    res.payment.COD.status === 'N' /* 無法貨到付款 */
+    res.payment.LIP.status === 'N' /* 無法使用LinePay */
   ) {
     return console.log('取消流程')
   }
 
   // 送出訂單
   const result = await api.order({
-    payWay: 'COD' || 'ATM' || 'IBO', // COD 為貨到付款、ATM 為 ATM 付款、IBO 為 ibon 付款
-    cusName: 'Sam',
-    cusMobile: '0987654321',
-    cusZip: '110',
-    cusAddress: '台北市信義區101',
-    recName: 'Sam',
-    recMobile: '0987654321',
-    recZip: '110',
-    recAddress: '台北市信義區101',
+    payWay: 'LIP', // COD 為貨到付款、ATM 為 ATM 付款、IBO 為 ibon 付款、LIP 為 LinePay 付款
+    cusName: '',
+    cusMobile: '',
+    cusZip: '',
+    cusAddress: '',
+    recName: '',
+    recMobile: '',
+    recZip: '',
+    recAddress: '',
   })
 
   if (result.status === 'ERR') {
