@@ -1,7 +1,5 @@
 # 參考 pchome-api
 
-##
-
 forked form https://github.com/ALiangLiang/pchome-api
 
 能夠使用LinePay結帳，直接成立訂單
